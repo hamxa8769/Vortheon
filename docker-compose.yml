@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  # The API Gateway (orchestrator)
+  nullai-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # Separate dev Dockerfile with Python deps
+    ports:
+      - "8000:8000"
+    environment:
+      - EPHEMERAL_MODE=1
+      - NO_PERSISTENCE=1
+      - REDIS_URL=redis://nullai-redis:6379
+    volumes:
+      - ./core:/app/core
+      - ./platform:/app/platform
+    depends_on:
+      - nullai-redis
+    command: uvicorn platform.api_gateway:app --host 0.0.0.0 --port 8000 --no-access-log
+    networks:
+      - nullai-net
+
+  # Ephemeral Redis (RAM-only, no persistence)
+  nullai-redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    # CRITICAL: --save "" and --appendonly no = NO DISK PERSISTENCE
+    networks:
+      - nullai-net
+
+  # Inference container (spawned dynamically by orchestrator)
+  # This is a template - actual containers are spawned per-session
+  nullai-inference-template:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["template"]  # Only built, not run by default
+    networks:
+      - nullai-net
+
+networks:
+  nullai-net:
+    driver: bridge

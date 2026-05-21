@@ -1,0 +1,21 @@
+# CORE DEPENDENCIES
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.0
+
+# CRYPTOGRAPHY
+cryptography==43.0.0
+PyJWT==2.9.0
+
+# DOCKER ORCHESTRATION
+docker==7.1.0
+
+# OPTIONAL: vLLM for production inference (requires GPU)
+# vllm==0.6.0
+
+# OPTIONAL: Ollama Python client for local dev
+# ollama==0.3.0
+
+# DEV TOOLS (not for production containers)
+# pytest==8.3.0
+# black==24.8.0
